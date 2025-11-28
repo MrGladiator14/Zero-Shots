@@ -1,0 +1,862 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  MessageSquare, 
+  FileText, 
+  Play, 
+  Save, 
+  Upload, 
+  Bot, 
+  LayoutDashboard, 
+  Settings, 
+  X, 
+  CheckCircle, 
+  AlertCircle, 
+  Loader2, 
+  Plus, 
+  Trash2, 
+  Maximize2,
+  ChevronRight,
+  History,
+  Send,
+  Bell,
+  Phone
+} from 'lucide-react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
+
+// import { FileText, Upload, Bot, Loader2, MessageSquare, Send, Bell } from 'lucide-react';
+
+/**
+ * Utility for handling local storage
+ */
+const useLocalStorage = (key, initialValue) => {
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
+
+  const setValue = (value) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue];
+};
+
+// --- Mock Data & Constants ---
+const INITIAL_TEMPLATES = [
+  { id: 1, title: 'Invoice Extraction', prompt: 'Go to generic-invoices.com, log in, and download all PDF invoices from last month.', parallel: 2 },
+  { id: 2, title: 'Competitor Pricing', prompt: 'Scrape pricing data for "Enterprise Plan" from top 5 competitor sites.', parallel: 5 },
+];
+
+const MOCK_CHAT_HISTORY = [
+  // { id: 1, role: 'user', content: 'What is the travel expense policy for international flights?' },
+  // { id: 2, role: 'agent', content: 'According to the policy document (Page 4, Section 2.1), international flights must be booked at least 14 days in advance. Business class is permitted for flights exceeding 8 hours.' }
+];
+
+const COLORS = ['#10B981', '#F59E0B', '#EF4444', '#3B82F6'];
+
+export default function FinOpsCopilot() {
+  const [activeMode, setActiveMode] = useState('chat'); // 'chat' | 'agent'
+  
+  // --- Shared State ---
+  const [notification, setNotification] = useState(null);
+
+  // --- Helper: Notifications ---
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  return (
+    <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
+      {/* --- Sidebar Navigation --- */}
+      <aside className="w-20 lg:w-64 bg-slate-900 text-white flex flex-col transition-all duration-300 shadow-xl z-20">
+        <div className="p-6 flex items-center justify-center lg:justify-start gap-3 border-b border-slate-700">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <Bot size={20} className="text-white" />
+          </div>
+          <span className="font-bold text-lg hidden lg:block tracking-wide">FinOpsCo-pilot.ai</span>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2">
+          <NavItem 
+            icon={<FileText size={20} />} 
+            label="Document Chat" 
+            isActive={activeMode === 'chat'} 
+            onClick={() => setActiveMode('chat')} 
+          />
+          <NavItem 
+            icon={<LayoutDashboard size={20} />} 
+            label="Browser Agent" 
+            isActive={activeMode === 'agent'} 
+            onClick={() => setActiveMode('agent')} 
+          />
+        </nav>
+
+        <div className="p-4 border-t border-slate-700">
+          <div className="flex items-center gap-3 text-slate-400 hover:text-white cursor-pointer transition-colors p-2 rounded-lg hover:bg-slate-800">
+            <Settings size={20} />
+            <span className="hidden lg:block text-sm font-medium">Settings</span>
+          </div>
+        </div>
+      </aside>
+
+      {/* --- Main Content Area --- */}
+      <main className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Header */}
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm z-10">
+          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            {activeMode === 'chat' ? (
+              <><FileText className="text-blue-500" /> Knowledge Base & Chat</>
+            ) : (
+              <><LayoutDashboard className="text-indigo-500" /> Agent Workflow Automation</>
+            )}
+          </h1>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-semibold border border-green-100">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              System Operational
+            </div>
+            <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold border border-slate-300">
+              JD
+            </div>
+          </div>
+        </header>
+
+        {/* Content Body */}
+        <div className="flex-1 overflow-hidden relative">
+          {activeMode === 'chat' ? (
+            <DocumentChatMode showNotification={showNotification} />
+          ) : (
+            <BrowserAgentMode showNotification={showNotification} />
+          )}
+        </div>
+
+        {/* Global Notification Toast */}
+        {notification && (
+          <div className={`absolute top-20 right-8 z-50 px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-slideIn ${
+            notification.type === 'error' ? 'bg-red-500 text-white' : 'bg-slate-800 text-white'
+          }`}>
+            {notification.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
+            <span className="font-medium">{notification.message}</span>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+// --- Navigation Component ---
+const NavItem = ({ icon, label, isActive, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
+      isActive 
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' 
+        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+    }`}
+  >
+    {icon}
+    <span className="hidden lg:block font-medium">{label}</span>
+    {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white hidden lg:block" />}
+  </button>
+);
+// ==================================================================================
+// MODE 1: DOCUMENT CHAT
+// ==================================================================================
+
+// Helper function to simulate notifications
+const mockShowNotification = (message, type = 'success') => {
+  console.log(`[Notification | ${type.toUpperCase()}]: ${message}`);
+  // In a real app, this would display a transient toast/alert.
+  alert(`[Notification | ${type.toUpperCase()}]: ${message}`);
+};
+
+const DocumentChatMode = ({ showNotification }) => {
+  const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(null);
+  const [messages, setMessages] = useState(MOCK_CHAT_HISTORY);
+  const [input, setInput] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const contextFileRef = useRef("");
+  
+  // NEW STATE for the client message box
+  const [clientMessageInput, setClientMessageInput] = useState('');
+
+  const messagesEndRef = useRef(null);
+  const handleFileUpload = (e) => {
+    const uploadFile = async (selectedFile) => {
+      if (!selectedFile || selectedFile.type !== 'application/pdf') {
+        showNotification('Please upload a valid PDF file.', 'error');
+        return;
+      }
+
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      try {
+        const response = await fetch('http://localhost:8000/api/upload_doc', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed with status: ${response.status}`);
+        }
+
+        await response.json(); // Assuming server sends back some JSON
+
+        setFile(selectedFile);
+        const url = URL.createObjectURL(selectedFile);
+        setFileUrl(url);
+        showNotification(`Processed ${selectedFile.name}`);
+        contextFileRef.current = selectedFile.name;
+
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          role: 'system',
+          content: `Document "${selectedFile.name}" loaded successfully. I'm ready to answer questions about it.`
+        }]);
+      } catch (error) {
+        console.error('File upload error:', error);
+        showNotification('Failed to process document.', 'error');
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    uploadFile(e.target.files[0]);
+  };
+
+  const handleSendMessage = () => {
+    if (!input.trim()) return;
+    
+    // Add user message
+    const userMsg = { id: Date.now(), role: 'user', content: input };
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
+    setIsProcessing(true);
+
+    // Simulate agent response
+    setTimeout(() => {
+      const agentMsg = { 
+        id: Date.now() + 1, 
+        role: 'agent', 
+        content: `I've analyzed the document context regarding "${userMsg.content}". Based on page 3, paragraph 2, the data indicates a 15% increase in operational overhead Q-over-Q.` 
+      };
+      setMessages(prev => [...prev, agentMsg]);
+      setIsProcessing(false);
+    }, 1500);
+  };
+  
+  // NEW HANDLER for sending a message to the client
+  const handleSendToClient = async () => {
+    if (!clientMessageInput.trim()) return;
+    
+    try {
+      const response = await fetch('http://localhost:8000/api/notify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: clientMessageInput,
+          context_document: "+91"+contextFileRef.current,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
+
+      await response.json();
+      showNotification(`Call sent to client: "${clientMessageInput}"`, 'info');
+      setClientMessageInput('');
+    } catch (error) {
+      console.error('Error sending message to client:', error);
+      showNotification('Failed to send message to client.', 'error');
+    }
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <div className="flex h-full w-full font-sans antialiased">
+      {/* Left Panel: PDF Viewer / Upload */}
+      <div className="w-1/2 bg-slate-100 border-r border-slate-200 flex flex-col p-4 shadow-inner">
+        <div className="text-xl font-bold text-slate-700 mb-4">Document Viewer</div>
+        {fileUrl && !isUploading ? (
+          <div className="flex-1 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex flex-col">
+            <div className="h-12 bg-slate-50 border-b border-slate-200 flex items-center justify-between px-4">
+              <span className="text-sm font-semibold text-slate-700 truncate flex items-center gap-2">
+                <FileText size={16} className="text-red-500" />
+                {file.name}
+              </span>
+              <button 
+                onClick={() => { setFile(null); setFileUrl(null); setMessages(MOCK_CHAT_HISTORY); }}
+                className="text-xs text-red-500 hover:text-red-700 font-medium p-1 rounded transition-colors"
+              >
+                Close File
+              </button>
+            </div>
+            <iframe src={fileUrl} className="w-full flex-1" title="PDF Viewer" />
+          </div>
+        ) : isUploading ? (
+          <div className="flex-1 border-4 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center bg-slate-50">
+            <div className="flex flex-col items-center justify-center text-slate-500">
+              <Loader2 size={48} className="animate-spin text-blue-500 mb-4" />
+              <p className="font-semibold text-lg">Processing Document...</p>
+              <p className="text-sm">This may take a moment.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 border-4 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center bg-slate-50 hover:bg-blue-50 hover:border-blue-400 transition-all cursor-pointer group">
+             <label className="flex flex-col items-center cursor-pointer w-full h-full justify-center p-8">
+              <div className="w-20 h-20 bg-white rounded-full shadow-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ring-4 ring-blue-100 group-hover:ring-blue-200">
+                <Upload size={40} className="text-blue-600" />
+              </div>
+              <h3 className="text-xl font-extrabold text-slate-800">Upload Policy Document</h3>
+              <p className="text-slate-500 text-base mt-2">Drag & drop or click to browse (PDF only)</p>
+              <input type="file" accept="application/pdf" className="hidden" onChange={handleFileUpload} />
+            </label>
+          </div>
+        )}
+      </div>
+
+      {/* Right Panel: Chat Interface (Added h-full for explicit height) */}
+      <div className="w-1/2 flex flex-col bg-white h-full">
+        
+        {/* NEW: Client Message Box (Added flex-shrink-0) */}
+        <div className="p-4 bg-yellow-50 border-b border-yellow-200 shadow-sm flex-shrink-0">
+            <h3 className="text-xs font-bold uppercase text-yellow-800 mb-2 flex items-center gap-1">
+                <Bell size={14} className="text-yellow-600"/> Direct Communication Channel (Client)
+            </h3>
+            <div className="flex gap-2">
+                <input
+                    type="text"
+                    value={clientMessageInput}
+                    onChange={(e) => setClientMessageInput(e.target.value)}
+                    placeholder="Type message for the policy owner..."
+                    className="flex-1 bg-white border border-yellow-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none placeholder:text-yellow-400"
+                    onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendToClient(); }}}
+                />
+                <button
+                    onClick={handleSendToClient}
+                    disabled={!clientMessageInput.trim()}
+                    className="p-2 px-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-1 shadow-md hover:shadow-lg"
+                >
+                    <Phone size={16} /> Call Client
+                </button>
+            </div>
+            <p className="text-[10px] text-yellow-600 mt-1 px-1">This message is sent outside the agent chat context.</p>
+        </div>
+
+        {/* Chat History (Added min-h-0 to allow proper flex shrinking/scrollability) */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50 min-h-0">
+           {messages.length === 0 && (
+             <div className="flex flex-col items-center justify-center h-full text-slate-400 opacity-60">
+                <Bot size={64} className="mb-4" />
+                <p>Start a conversation with your document agent</p>
+             </div>
+           )}
+           {messages.map((msg) => (
+             <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+               <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-md ${
+                 msg.role === 'user' ? 'bg-indigo-600' : msg.role === 'system' ? 'bg-green-600' : 'bg-blue-600'
+               }`}>
+                 {msg.role === 'user' ? <span className="text-white font-bold text-xs">YOU</span> : <Bot size={20} className="text-white" />}
+               </div>
+               <div className={`p-4 rounded-2xl max-w-[80%] shadow-lg ${
+                 msg.role === 'user' 
+                  ? 'bg-indigo-600 text-white rounded-tr-none' 
+                  : msg.role === 'system'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : 'bg-white text-slate-700 border border-slate-200 rounded-tl-none'
+               }`}>
+                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                 <span className="text-[10px] opacity-70 mt-2 block capitalize">{msg.role} • Now</span>
+               </div>
+             </div>
+           ))}
+           {isProcessing && (
+             <div className="flex gap-4">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                  <Bot size={20} className="text-white" />
+                </div>
+                <div className="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin text-blue-500" />
+                  <span className="text-sm text-slate-500">Analyzing document...</span>
+                </div>
+             </div>
+           )}
+           <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area (Existing Chat) (Added flex-shrink-0) */}
+        <div className="p-4 bg-white border-t border-slate-200 shadow-2xl flex-shrink-0">
+          <div className="relative">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }}}
+              placeholder="Ask about specific clauses, expenses, or dates..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none h-24 text-sm shadow-inner"
+            />
+            <button 
+              onClick={handleSendMessage}
+              disabled={!input.trim() || isProcessing}
+              className="absolute bottom-3 right-3 p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+            >
+              <MessageSquare size={18} />
+            </button>
+          </div>
+          <div className="flex items-center justify-between mt-2 px-1">
+            <span className="text-xs text-slate-400">Press Enter to send</span>
+            <span className="text-xs text-slate-400 flex items-center gap-1"><Bot size={12}/> FinOpsCo-pilot-v0.1 Model</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+// ==================================================================================
+// MODE 2: BROWSER AGENT WORKFLOW
+// ==================================================================================
+
+const BrowserAgentMode = ({ showNotification }) => {
+  const [prompts, setPrompts] = useLocalStorage('finops_prompts', INITIAL_TEMPLATES);
+  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [activeAgents, setActiveAgents] = useState([]);
+  const [executionModal, setExecutionModal] = useState(null); // { promptId, title, ... }
+  
+  // -- Execution Logic --
+  const executeWorkflow = (config) => {
+    // 1. Create mock agents based on config
+    const newAgents = Array.from({ length: config.parallelCount || 1 }).map((_, i) => ({
+      id: Date.now() + i,
+      name: `${config.title} - Instance ${i + 1}`,
+      status: 'starting', // starting, running, completed, failed
+      progress: 0,
+      logs: ['Initializing browser environment...'],
+      startTime: Date.now()
+    }));
+    
+    setActiveAgents(prev => [...newAgents, ...prev]);
+    setExecutionModal(null);
+    showNotification(`Started ${config.parallelCount} agent instances for "${config.title}"`);
+
+    // 2. Simulate progress
+    newAgents.forEach(agent => {
+      simulateAgentLifecycle(agent.id);
+    });
+  };
+
+  const simulateAgentLifecycle = (agentId) => {
+    const steps = [
+      { progress: 10, log: 'Navigating to target URL...', delay: 1000 },
+      { progress: 30, log: 'Authentication successful. Accessing dashboard.', delay: 2500 },
+      { progress: 60, log: 'Found 12 data points. Extracting...', delay: 4500 },
+      { progress: 85, log: 'Validating data against schema...', delay: 6000 },
+      { progress: 100, log: 'Exporting to CSV. Job Complete.', delay: 8000 }
+    ];
+
+    steps.forEach(step => {
+      setTimeout(() => {
+        setActiveAgents(prev => prev.map(a => {
+          if (a.id !== agentId) return a;
+          const isComplete = step.progress === 100;
+          return {
+            ...a,
+            status: isComplete ? 'completed' : 'running',
+            progress: step.progress,
+            logs: [step.log, ...a.logs]
+          };
+        }));
+      }, step.delay);
+    });
+  };
+
+  const saveCurrentPrompt = () => {
+    if (!currentPrompt.trim()) return;
+    const newTemplate = {
+      id: Date.now(),
+      title: `Custom Workflow ${prompts.length + 1}`,
+      prompt: currentPrompt,
+      parallel: 1
+    };
+    setPrompts([...prompts, newTemplate]);
+    setCurrentPrompt('');
+    showNotification('Prompt saved to templates');
+  };
+
+  const deleteTemplate = (id, e) => {
+    e.stopPropagation();
+    setPrompts(prompts.filter(p => p.id !== id));
+  };
+
+  // Stats calculation
+  const stats = {
+    running: activeAgents.filter(a => a.status === 'running' || a.status === 'starting').length,
+    completed: activeAgents.filter(a => a.status === 'completed').length,
+    failed: activeAgents.filter(a => a.status === 'failed').length,
+  };
+
+  const chartData = [
+    { name: 'Running', value: stats.running },
+    { name: 'Completed', value: stats.completed },
+    { name: 'Failed', value: stats.failed }
+  ];
+
+  return (
+    <div className="flex h-full bg-slate-50">
+      
+      {/* Sidebar: Templates */}
+      <div className="w-80 bg-white border-r border-slate-200 flex flex-col shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] z-10">
+        <div className="p-5 border-b border-slate-100">
+          <h2 className="font-bold text-slate-800 flex items-center gap-2">
+            <LayoutDashboard size={18} className="text-indigo-600"/>
+            Workflow Templates
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">Select a template to configure & run</p>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {prompts.map(template => (
+            <div 
+              key={template.id} 
+              onClick={() => setExecutionModal(template)}
+              className="group p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer relative"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-semibold text-slate-700 group-hover:text-indigo-600">{template.title}</h3>
+                <button onClick={(e) => deleteTemplate(template.id, e)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 line-clamp-2 mb-3">{template.prompt}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded font-medium border border-slate-200">
+                  {template.parallel} Parallel Agents
+                </span>
+              </div>
+              <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <Play size={14} className="text-indigo-600 fill-current" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        
+        {/* Top: Active Agents Dashboard (The "Screens") */}
+        <div className="flex-1 bg-slate-50 p-6 overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-slate-800">Live Operations Center</h2>
+            <div className="flex gap-4">
+               {/* Mini Stats */}
+               <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                  <span className="text-xs font-medium text-slate-600">Running: {stats.running}</span>
+               </div>
+               <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="text-xs font-medium text-slate-600">Done: {stats.completed}</span>
+               </div>
+            </div>
+          </div>
+
+          {activeAgents.length === 0 ? (
+            <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl bg-slate-100/50">
+              <LayoutDashboard size={48} className="text-slate-300 mb-3" />
+              <p className="text-slate-500 font-medium">No active agents running</p>
+              <p className="text-sm text-slate-400">Select a template or run a prompt below</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+              {activeAgents.map(agent => (
+                <AgentStatusCard key={agent.id} agent={agent} />
+              ))}
+            </div>
+          )}
+
+          {/* Charts Section */}
+          {activeAgents.length > 0 && (
+             <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 h-64">
+               <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
+                 <h4 className="text-sm font-semibold text-slate-600 mb-4">Task Completion Velocity</h4>
+                 <ResponsiveContainer width="100%" height="85%">
+                    <BarChart data={[{name: 'Queue', count: 0}, ...chartData]}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                      <Tooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
+                    </BarChart>
+                 </ResponsiveContainer>
+               </div>
+               <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                  <h4 className="text-sm font-semibold text-slate-600 mb-4">Success Rate</h4>
+                  <ResponsiveContainer width="100%" height="85%">
+                    <PieChart>
+                      <Pie
+                        data={chartData.filter(d => d.value > 0)}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}
+                        outerRadius={70}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+               </div>
+             </div>
+          )}
+        </div>
+
+        {/* Bottom: Prompt Input */}
+        <div className="bg-white border-t border-slate-200 p-6 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+          <div className="max-w-4xl mx-auto">
+             <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-semibold text-slate-700">New Agent Command</label>
+                <button onClick={saveCurrentPrompt} className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium">
+                   <Save size={14} /> Save as Template
+                </button>
+             </div>
+             <div className="flex gap-2">
+               <div className="flex-1 relative">
+                 <textarea
+                    value={currentPrompt}
+                    onChange={(e) => setCurrentPrompt(e.target.value)}
+                    placeholder="E.g., Navigate to AWS Cost Explorer, filter by 'Service: EC2', and export the CSV for last month."
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none h-14 shadow-inner transition-all focus:h-24"
+                 />
+                 <Bot className="absolute right-3 top-3 text-slate-400" size={18} />
+               </div>
+               <button 
+                  onClick={async () => {
+                    const config = { title: 'Ad-hoc Task', prompt: currentPrompt, parallelCount: 1 };
+                    try {
+                      const response = await fetch('http://localhost:8000/api/execute_workflow', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(config),
+                      });
+                      if (!response.ok) {
+                        throw new Error(`Network response was not ok, status: ${response.status}`);
+                      }
+                      await response.json();
+                      executeWorkflow(config);
+                    } catch (error) {
+                      console.error('Error executing ad-hoc workflow:', error);
+                      showNotification('Failed to start ad-hoc task.', 'error');
+                    }
+                  }}
+                  disabled={!currentPrompt.trim()}
+                  className="bg-indigo-600 text-white px-6 rounded-xl hover:bg-indigo-700 font-medium shadow-md shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex flex-col items-center justify-center gap-1"
+               >
+                 <Play size={20} className="fill-current" />
+                 <span className="text-[10px] uppercase tracking-wider">Run</span>
+               </button>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Execution Modal */}
+      {executionModal && (
+        <ExecutionConfigModal 
+          template={executionModal} 
+          onClose={() => setExecutionModal(null)} 
+          onExecute={executeWorkflow}
+        />
+      )}
+    </div>
+  );
+};
+
+// --- Sub-Component: Agent Status Card (The "Live Screen") ---
+const AgentStatusCard = ({ agent }) => {
+  const isFinished = agent.status === 'completed' || agent.status === 'failed';
+  
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-48 animate-fadeIn">
+      <div className="h-2 bg-slate-100 w-full relative">
+         <div 
+           className={`absolute left-0 top-0 bottom-0 transition-all duration-500 ${
+             agent.status === 'completed' ? 'bg-green-500' : agent.status === 'failed' ? 'bg-red-500' : 'bg-indigo-500'
+           }`} 
+           style={{ width: `${agent.progress}%` }} 
+         />
+      </div>
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex justify-between items-start mb-2">
+           <h4 className="font-bold text-slate-700 text-sm truncate w-3/4" title={agent.name}>{agent.name}</h4>
+           {agent.status === 'running' && <Loader2 size={16} className="animate-spin text-indigo-500" />}
+           {agent.status === 'completed' && <CheckCircle size={16} className="text-green-500" />}
+        </div>
+        
+        {/* Mock Terminal Output */}
+        <div className="flex-1 bg-slate-900 rounded-lg p-2 font-mono text-[10px] text-green-400 overflow-hidden relative">
+           <div className="absolute inset-0 p-2 overflow-hidden flex flex-col justify-end">
+              {agent.logs.slice(0, 4).map((log, i) => (
+                <div key={i} className="truncate opacity-80">&gt; {log}</div>
+              ))}
+           </div>
+        </div>
+        
+        <div className="mt-2 flex justify-between items-center text-xs text-slate-400">
+           <span>{isFinished ? 'Finished' : 'Processing...'}</span>
+           <span>{agent.progress}%</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Sub-Component: Execution Modal ---
+const ExecutionConfigModal = ({ template, onClose, onExecute }) => {
+  const [csvFile, setCsvFile] = useState(null);
+  const [parallelCount, setParallelCount] = useState(template.parallel || 1);
+  const [showPreview, setShowPreview] = useState(false);
+
+  const handleExecute = async () => {
+    const config = {
+        title: template.title,
+        prompt: template.prompt,
+        parallelCount: parseInt(parallelCount),
+        csvData: csvFile.name
+    };
+
+    const formData = new FormData();
+    formData.append('title', config.title);
+    formData.append('prompt', config.prompt);
+    formData.append('parallelCount', config.parallelCount);
+    if (config.csvData) {
+      formData.append('csvFile', config.csvData);
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/api/execute_workflow', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
+      await response.json();
+      onExecute(config);
+    } catch (error) {
+      console.error('Error executing workflow:', error);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-scaleIn">
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Configure Workflow</h3>
+            <p className="text-sm text-slate-500">{template.title}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+            <X size={20} className="text-slate-500" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+           {/* Batch Data Upload */}
+           <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Batch Data Input (CSV)</label>
+              <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 flex flex-col items-center justify-center bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer group">
+                 {csvFile ? (
+                   <div className="flex items-center gap-2 text-indigo-600 font-medium">
+                      <FileText size={20} />
+                      {csvFile.name}
+                      <button onClick={(e) => {e.stopPropagation(); setCsvFile(null)}} className="ml-2 text-red-400 hover:text-red-600"><X size={16}/></button>
+                   </div>
+                 ) : (
+                   <label className="flex flex-col items-center cursor-pointer">
+                     <Upload size={24} className="text-slate-400 group-hover:text-indigo-500 mb-2" />
+                     <span className="text-sm text-slate-500">Upload CSV to map variables</span>
+                     <input type="file" accept=".csv" className="hidden" onChange={(e) => setCsvFile(e.target.files[0])} />
+                   </label>
+                 )}
+              </div>
+           </div>
+
+           {/* Parallel Agents Slider */}
+           <div>
+              <div className="flex justify-between mb-2">
+                 <label className="block text-sm font-semibold text-slate-700">Parallel Agents</label>
+                 <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{parallelCount} Instances</span>
+              </div>
+              <input 
+                type="range" 
+                min="1" 
+                max="10" 
+                value={parallelCount} 
+                onChange={(e) => setParallelCount(e.target.value)}
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              />
+              <p className="text-xs text-slate-400 mt-2">Recommended: {csvFile ? 'Auto-scale based on CSV rows' : '1-5 for standard tasks'}</p>
+           </div>
+           
+           {/* Preview Toggle */}
+           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setShowPreview(!showPreview)}>
+              <div className={`w-4 h-4 rounded border ${showPreview ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300'}`}>
+                 {showPreview && <CheckCircle size={14} className="text-white" />}
+              </div>
+              <span className="text-sm text-slate-600">Preview prompt mappings before execution</span>
+           </div>
+        </div>
+
+        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
+          <button 
+            onClick={handleExecute}
+            className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-lg shadow-indigo-200 flex items-center gap-2 transition-transform active:scale-95"
+          >
+            <Play size={18} className="fill-current" />
+            Launch Agents
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
