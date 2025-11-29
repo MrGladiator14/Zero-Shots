@@ -13,6 +13,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_core.prompts import PromptTemplate
 
+from .config import Settings, settings as app_settings
+from . import services
+
 
 from dotenv import load_dotenv
 
@@ -74,11 +77,7 @@ def get_insurer_config(title: str) -> dict:
         }
     else:
         # Default fallback
-        return {
-            "username": os.getenv("DEFAULT_USERNAME", ""),
-            "password": os.getenv("DEFAULT_PASSWORD", ""),
-            "input_variables": ["username", "password", "registration_number", "today_date"],
-        }
+        return {}
 
 
 def get_records_from_csv(csv_path: str, insurer_type: str) -> list[dict]:
@@ -101,9 +100,7 @@ def get_records_from_csv(csv_path: str, insurer_type: str) -> list[dict]:
                     "registration_number": row.get("registration_number", ""),
                 }
             else:
-                record = {
-                    "registration_number": row.get("registration_number", ""),
-                }
+                record = {}
             records.append(record)
     return records
 
@@ -135,6 +132,14 @@ def format_prompts_for_records(
             "record": record,
         })
     return formatted
+
+def get_settings() -> Settings:
+    return app_settings
+
+
+def get_openai_client(settings: Annotated[Settings, Depends(get_settings)]) -> openai.OpenAI:
+    """Dependency to create and provide an OpenAI client."""
+    return openai.OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 # --- Endpoints ---
