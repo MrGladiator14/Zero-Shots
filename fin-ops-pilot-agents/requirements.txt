@@ -5,3 +5,4 @@ openai
 PyMuPDF
 pydantic-settings
 python-dotenv
+langchain-core

@@ -1,96 +1,101 @@
-**Comprehensive Summary of Digit Total Protect Policy**
+**Digit Total Protect Policy Summary**
 
-**Policy Overview**  
-- **Insurer:** Go Digit General Insurance Ltd  
-- **UIN:** GODPAIP21489V022021  
-- **Policy No.:** D216442086  
-- **Policy Schedule No.:** N8078  
-- **Policy Issue Date:** 30-Jul-2025  
-- **Policy Period:** 30-Jul-2025 00:01 to 29-Jul-2026 23:59  
-- **Premium Payment Term:** 1 Year  
-- **Policy Type:** Individual  
-- **Family Composition:** 1 Adult  
-- **Partner:** TURTLEMINT INSURANCE BROKING SERVICES PRIVATE LIMITED  
-  - **Contact:** +919972529879  
-  - **Code:** 1129382  
-  - **Email:** policy@turtlemint.com  
+**Policy Information:**
+- **UIN:** GODPAIP21489V022021
+- **Insurer:** Go Digit General Insurance Ltd
+- **Policy Schedule:** N8078
+- **Policy No.:** D216442086
+- **Issue Date:** 30-Jul-2025
+- **Policy Period:** 30-Jul-2025 00:01 to 29-Jul-2026 23:59
+- **Premium Payment Term:** 1 Year
+- **Policy Type:** Individual
+- **Family Composition:** 1 Adult
+- **Partner Name:** TURTLEMINT INSURANCE BROKING SERVICES PRIVATE LIMITED
+- **Partner Contact:** +919972529879
+- **Partner Code:** 1129382
+- **Partner Email:** policy@turtlemint.com
 
-**Insured Details**  
-- **Name:** Sachin Kumar Gautam  
-- **DOB/Age:** 05-Jul-1997 (28 Years)  
-- **Gender:** Male  
-- **Relationship with Proposer:** Self  
-- **Occupation/Risk Class:** Office Employees/RISK CLASS 1  
-- **Nominee:** Ram Sajivan (Father)  
-- **Contact Information:**  
-  - **Mobile:** xxxxxxxxx5798  
-  - **Email:** sxxxxxxx7@gxxxl.com  
-  - **Address:** KHADIM ALI KHERA, SAFIPUR UNNAO, Unnao, 209871  
+**Insured Details:**
+- **Name:** Sachin Kumar Gautam
+- **Mobile:** xxxxxxxxx5798
+- **Email:** sxxxxxxx7@gxxxl.com
+- **Location:** KHADIM ALI KHERA, SAFIPUR UNNAO, Unnao 209871
+- **Date of Birth:** 05-Jul-1997 (28 Years)
+- **Gender:** Male
+- **Relationship with Proposer:** Self
+- **Occupation/Risk Class:** Office Employees/RISK CLASS 1
+- **Nominee:** Ram Sajivan (Father)
 
-**Coverage Details**  
-- **Accidental Death:** INR 1,00,000  
-- **Permanent Total Disablement:** INR 1,00,000  
-- **Permanent Partial Disablement:** INR 1,00,000  
-- *Note: Benefits are part of Section 11 Accidental Hospitalization Cover Sum Insured.*  
-- **Special Terms:**  
-  - **Terrorism Covered:** No  
-  - **On-Duty Cover Opted:** No  
+**Coverage Details:**
+- **Accidental Death:** INR 1,00,000
+- **Permanent Total Disablement:** INR 1,00,000
+- **Permanent Partial Disablement:** INR 1,00,000
+- *Note: Benefits are part of Section 11 Accidental Hospitalization Cover Sum Insured.*
+- **Terrorism Covered:** No
+- **On-Duty Cover Opted:** No
 
-**Premium Details**  
-- **GST State:** Uttar Pradesh  
-- **GSTIN:** Unregistered  
-- **Receipt No.:** RA243277755  
-- **Receipt Date:** 30-Jul-2025  
-- **Invoice No.:** IA192982657  
-- **Invoice Date:** 30-Jul-2025  
-- **Payment Mode:** ONLINE  
-- **Payment Date:** 30-Jul-2025  
-- **Amount:** INR 75.52  
-  - **Base Premium:** INR 64.00  
-  - **Underwriting Loading:** INR 0.00  
-  - **Total Net Premium:** INR 64.00  
-  - **IGST @ 18%:** INR 11.52  
+**Premium Details:**
+- **GST State Name:** Uttar Pradesh
+- **GSTIN:** Unregistered
+- **Receipt No.:** RA243277755
+- **Receipt Date:** 30-Jul-2025
+- **Invoice No.:** IA192982657
+- **Invoice Date:** 30-Jul-2025
+- **Mode of Payment:** ONLINE
+- **Payment Date:** 30-Jul-2025
+- **Amount (INR):** 75.52
+  - **Base Premium:** 64.00
+  - **Underwriting Loading:** 0.00
+  - **Total Net Premium:** 64.00
+  - **IGST @ 18%:** 11.52
+  - **Final Premium:** 75.52
 
-**Policy Conditions**  
-- The policy is void if the premium is not received or if the cheque is dishonored.  
-- Coverage is based on information provided by the proposer; the insurer is not liable for incorrect, misleading, or fraudulent statements.  
-- Claims may be denied if the declared Gross Annual Income is incorrect or if proof of income is not submitted.  
-- The policy is regulated under the Insurance Act 1938, Section 41, which prohibits rebates, with penalties up to ten lakhs rupees for non-compliance.  
-- Go Digit General Insurance Ltd. is licensed by the Insurance Regulatory and Development Authority of India (IRDAI), registered under Reg No. 158, with Corporate Identification Number L66010PN2016PLC167410.  
+**Important Notes:**
+1. Policy void if premium not received or cheque dishonored.
+2. Subject to standard policy wordings, warranties, exclusions, and conditions as per “Digit Total Protect Policy” Wordings. In case of dispute, policy document terms prevail.
 
-**Claims Process**  
-1. **Cashless Claim Process (for Accidental Hospitalization Cover):**  
-   - Notice must be given within 24 hours of hospitalization in emergencies.  
-   - Present Health Card/E-Cards and ID Proof to the hospital, obtain a Pre-Authorization Form, and submit it to the hospital counter.  
-   - Ensure treatment occurs within 15 days of Pre-Authorization approval or by the policy expiry date.  
-   - The insurer reserves the right to modify the list of Network Providers for the Cashless Facility.  
+**Claims Process:**
+- The insurance coverage is based on the information provided by the proposer. The insurer will not be liable if any statements or declarations are found to be incorrect, misleading, or fraudulent. Claims may be denied if the declaration is incorrect or if income proof is not submitted.
+- **Key Contact Details:**
+  - Claim Administrator: 7026061234 (WhatsApp)
+  - Email: healthclaims@godigit.com
+  - Praveen Bhat, Senior Vice President - Customer Experience, praveen.bhat@godigit.com
 
-2. **Reimbursement Claim Process:**  
-   - Intimation to the TPA must occur 48 hours before admission.  
-   - Submit all original hospitalization documents within 30 days of discharge.  
-   - Claims will be settled or repudiated within 30 days of receiving the last necessary document, with interest paid at a rate of 2% above the bank rate for delays.  
-   - In the event of the policyholder's death, the claim amount will be reimbursed to the named nominee or legal representative with a valid succession certificate.  
+**Digital Execution:**
+- The document is digitally signed and executed in Bengaluru, with consolidated stamp duty paid as per Letter of Authorization No. 67-B/04/2017-18 dated 30th May 2017.
 
-**Documentation Requirements for Claims**  
-- **General Requirements:**  
-  - Attested copy of FIR (if required), investigation reports, complete treatment records, and specific documents based on the claim type.  
-- **Accidental Death:** Death certificate, hospital death summary, burial certificate, witness statement, FIR, post mortem report, and participation certificate for adventure sports.  
-- **Permanent Total/Partial Disablement:** Disability certificate, FIR (if required), and investigation reports confirming disability.  
-- **Children Education Benefit:** Bonafide Certificate from School/College.  
-- **Marriage Expense for Children Benefit:** Proof of relationship and age proof of the dependent child.  
-- **Funeral Expenses:** Original invoice of expenses incurred.  
-- **Transportation Expenses:** Original invoice of expenses incurred during the funeral.  
-- **Trauma Counselling:** Documents as per Accidental Death and Disablement claims, along with counselling expenses invoices.  
-- **Accidental Hospitalization Cover:** Discharge summary, original hospital bills, pharmacy bills, and consultation papers.  
-- **Home (Domiciliary) Hospitalization:** Attending physician certificate and original invoices for payments to the treating medical practitioner.  
-- **Out-patient Benefit:** Consultation papers and original investigation bills.  
+**Regulatory Compliance:**
+- Under the Insurance Act 1938 Section 41, offering or accepting rebates related to insurance in India is prohibited, with penalties up to ten lakhs rupees for non-compliance. Go Digit General Insurance Ltd. is incorporated under the Indian Companies Act, 2013, and licensed by the Insurance Regulatory and Development Authority of India (IRDAI) with registration number not specified in the text.
 
-**Additional Claims Requirements**  
-- **Coma Benefit Cover:** Certificate from the Treating Medical Practitioner.  
-- **Fracture Cover:** X-ray confirming the fracture, treatment details, and discharge summary if hospitalized.  
-- **Burns Cover:** Certificate from the Treating Medical Practitioner regarding the extent and cause of burns.  
-- **Lifestyle Modification:** Certification from a Medical Practitioner and original invoices for expenses incurred.  
-- **Critical Illness and HIV Cover:** Medical reports and a certificate from a Medical Practitioner confirming the illness.  
-- **In Case of Death:** Attested copies of the death certificate and other relevant documents.  
+**IRDAI Information:**
+- Registered under Reg No. 158, Corporate Identification Number L66010PN2016PLC167410, with a registered address at Atlantis, 95, 4th B Cross Road, Koramangala Industrial Layout, 5th Block, Bengaluru 560095. GST Reg. No. is 29AACCO4128Q1ZW, and GSTIN address is Mumbai Business Centre, Tower-1, Elphinstone (West), 1201, 12th Floor, India Bull Finance Center, Senapati Bapat Road, Mumbai, Maharashtra, PIN-400013. Website: www.godigit.com/general-insurance.
 
-This comprehensive summary encapsulates all critical details regarding the Digit Total Protect Policy, including policy specifics, coverage, premium details, claims processes, and documentation requirements, ensuring clarity and completeness for the policyholder.
+**Claims Related to Accidental Injury or Critical Illness:**
+1. **Cashless Claim Process:**
+   - Notice must be given within 24 hours of hospitalization in emergencies.
+   - Procedure includes sharing the Health Card/E-Cards and ID Proof with the hospital, submitting a Pre-Authorization Form, and ensuring the hospital sends this form to the Service Provider/Third Party Administrator (TPA).
+   - Treatment must occur within 15 days of Pre-Authorization approval or by the policy expiry date, whichever is earlier.
+
+2. **Reimbursement Claim Process:**
+   - Intimate the Service Provider/TPA 48 hours prior to admission.
+   - Submit all original hospitalization documents within 30 days from the date of discharge.
+   - Claims will be settled or repudiated within 30 days of receiving the last necessary document. If payment is delayed beyond 30 days, interest will be paid at a rate of 2% above the bank rate at the start of the financial year.
+
+**Documentation Requirements for Claims:**
+- **General Requirements:**
+  - Attested copy of FIR (if required).
+  - All investigation reports confirming disability.
+  - Complete treatment record with follow-up documentation.
+
+- **Specific Claims:**
+  - **Accidental Death:** Address proof, death certificate, hospital death summary, burial certificate, witness statement, FIR, post mortem report.
+  - **Permanent Total/Partial Disablement:** Disability certificate, FIR (if required), investigation reports confirming the disability.
+  - **Children Education Benefit:** Bonafide Certificate from School/College.
+  - **Marriage Expense for Children Benefit:** Proof of relationship with the insured person.
+  - **Funeral Expenses:** Original invoice of expenses incurred during the funeral.
+  - **Transportation Expenses:** Original invoice of expenses incurred during the funeral.
+  - **Trauma Counselling:** Original invoice of counselling expenses, medical practitioner’s letter advising counselling.
+  - **Accidental Hospitalization Cover:** Discharge summary, original hospital main bill, original pharmacy bills, consultation papers, investigation reports.
+
+**Final Notes:**
+- Policyholders must promptly provide documentation for claim investigations. In the event of the Insured Person's death, notification must be given in writing immediately, along with a post mortem report (if conducted) within 30 days. KYC documents are mandatory at the claim settlement stage if the payout exceeds Rs. 1 Lakhs per claim.

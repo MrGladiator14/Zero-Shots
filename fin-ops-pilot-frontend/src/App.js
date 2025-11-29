@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import FinOpsCopilot from'./componenets/FinOpsCopilot.js';
+import FinOpsCopilot from'./components/FinOpsCopilot.js';
 
 function App() {
   return (

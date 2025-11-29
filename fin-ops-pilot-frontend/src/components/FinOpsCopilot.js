@@ -354,7 +354,7 @@ const DocumentChatMode = ({ showNotification }) => {
         {/* NEW: Client Message Box (Added flex-shrink-0) */}
         <div className="p-4 bg-yellow-50 border-b border-yellow-200 shadow-sm flex-shrink-0">
             <h3 className="text-xs font-bold uppercase text-yellow-800 mb-2 flex items-center gap-1">
-                <Bell size={14} className="text-yellow-600"/> Direct Communication Channel (Client)
+                <Bell size={14} className="text-yellow-600"/> A live AI agent will contact the client and answer policy related queries.
             </h3>
             <div className="flex gap-2">
                 <input

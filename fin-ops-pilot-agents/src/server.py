@@ -3,14 +3,17 @@ import uuid
 import csv
 import asyncio
 from pathlib import Path
-from typing import Optional
+from typing import Optional,Annotated
 from datetime import datetime
-
+from fastapi import Depends
+from pydantic import BaseModel
+import openai
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_core.prompts import PromptTemplate
-
+from .config import Settings, settings as app_settings
+from . import services
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,6 +37,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class Notification(BaseModel):
+    message: str
+    context_document: str
+
+class UploadDocRequest(BaseModel):
+    name: str
 
 # Storage paths
 UPLOAD_DIR = Path("uploads")
@@ -143,44 +153,67 @@ def read_root():
 
 
 @app.post("/api/upload_doc")
-async def upload_doc(file: UploadFile = File(...)):
-    """Accept and store uploaded PDF policy documents."""
-    if file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
+async def upload_doc(
+    settings: Annotated[Settings, Depends(get_settings)],
+    request_data: UploadDocRequest,
+):
+    """
+    Receives a file upload, saves it, processes it to generate a summary,
+    and stores the summary.
+    """
+    # Ensure the upload directory exists
+    settings.UPLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
-    file_id = str(uuid.uuid4())
-    file_path = UPLOAD_DIR / f"{file_id}_{file.filename}"
+    file_path = settings.UPLOAD_DIRECTORY / request_data.name
+    
+    try:
+        summary = services.process_and_summarize_pdf(
+            file_path=file_path, api_key=settings.OPENAI_API_KEY
+        )
 
-    content = await file.read()
-    with open(file_path, "wb") as f:
-        f.write(content)
+        # Store the summary to the specified file
+        summary_path = settings.CONTEXT_DIR / "policy_schedule.txt"
+        services.save_summary(summary, summary_path)
 
-    return {
-        "success": True,
-        "file_id": file_id,
-        "filename": file.filename,
-        "path": str(file_path),
-    }
+        return {
+            "summary": summary,
+            "storage_path": str(summary_path),
+        }
+    except openai.APIError as e:
+        raise HTTPException(status_code=502, detail=f"OpenAI API error: {e.message}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process document: {str(e)}")
 
 
 @app.post("/api/notify")
-async def notify(request: NotifyRequest):
-    """Trigger client notification/call."""
-    phone_number = request.context_document
-    message = request.message
-
-    # TODO: Integrate with actual calling/notification service
-    print(f"[Notify] Sending to {phone_number}: {message}")
-
-    return {
-        "success": True,
-        "message": "Notification dispatched",
-        "phone": phone_number,
-    }
+async def notify(
+    notification: Notification,
+    settings: Annotated[Settings, Depends(get_settings)],
+    client: Annotated[openai.OpenAI, Depends(get_openai_client)],
+):
+    try:
+        policy_schedule_path = settings.CONTEXT_DIR / "policy_schedule.txt"
+        client_details_path = await services.create_client_details_from_notification(
+            notification_message=notification.message,
+            context_dir=settings.CONTEXT_DIR,
+            policy_schedule_path=policy_schedule_path,
+            client=client,
+        )
+        return {
+            "status": "success",
+            "message": "Client details created successfully.",
+            "path": str(client_details_path),
+        }
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except openai.APIError as e:
+        raise HTTPException(status_code=502, detail=f"OpenAI API error: {e.message}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 async def run_browser_agent(job_id: str, formatted_prompts: list[dict]):
-    """
+    """UploadDocRequest
     Background task to run browser_use agents for each formatted prompt.
     
     Args:
