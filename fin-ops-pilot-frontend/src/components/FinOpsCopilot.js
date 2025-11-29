@@ -33,6 +33,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import INITIAL_TEMPLATES from '../data/templates.json';
 
 // import { FileText, Upload, Bot, Loader2, MessageSquare, Send, Bell } from 'lucide-react';
 
@@ -40,71 +41,7 @@ import {
  * Utility for handling local storage
  */
 const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(error);
-      return initialValue;
-    }
-  });
-
-  const setValue = (value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return [storedValue, setValue];
 };
-
-// --- Mock Data & Constants ---
-const INITIAL_TEMPLATES = [
-  {
-    id: 1,
-    title: 'Royal Sundaram Motor policy Quote Fetch Workflow',
-    prompt: `1. Navigate to Login to 'https://www.royalsundaram.in/MOPIS/Login.jsp', and then enter username and password. Username is {username}, password is {password}. Click on sign in after both username and password are entered.
-2. From dashboard, click 'Rating Calculator' in side menu. Wait for 10 seconds.
-3. Select 'New Business' icon under 'Type of Policy' and choose 'Private Car passenger' in the list of options present below. Wait for 10 seconds.
-4. Click on 'Private Car' icon under the 'click tick done' title. Wait for 10 seconds.
-5. On the 'Car Insurance in a few steps' box, enter vehicle number {registration_number} and click on 'get started'. Note that there are 4 text boxes for the vehicle number input; add 'MH' to first, '02' to the next one and so on. Once done, wait for 10 seconds.
-6. Click Proceed on the popup that follows; do this for any popups that come up.
-7. On the Policy details page, scroll down to the 'Previous Insurance and Pre Inspection Details' and set date under 'Previous Policy Expiry Date' as 7/11/2025. DO NOT touch any other elements.
-8. Only once the date is set, click 'next'. Wait for 10 seconds.
-9. On the side menu that shows up, click on 'proceed'. Say yes to any popups that come up.
-10. On the vpc_comprehensive page, set distance to 'unlimited km', wait for 10 seconds.
-11. Click on calculate / recalculate button. Wait for 10 seconds.
-12. Click on the 'Freeze Quote' button once it turns blue.
-13. On the side menu that comes up, enter name '{first_name}', last name: '{last_name}', WhatsApp number: '{whatsapp_number}', and click on submit. Wait for 10 seconds.
-14. Click on 'policy documents' dropdown, and choose 'print quote' option. The quote file should now be on a different tab.`,
-    parallel: 2
-  },
-  {
-    id: 2,
-    title: 'Vehicle Premium calculation from Reliance Portal',
-    prompt:
-      `Goal: Fetching Vehicle Premium value.
-1. Log into https://smartzone.reliancegeneral.co.in/Login/IMDLogin. Fill username: {username}, and password: {password}. Also fill the CAPTCHA value based on the image you see above it. Once done, click on the circular 'LOGIN' button. You may retry the captcha by clicking on 'refresh symbol' if you fail.
-2. Once the dashboard loads, hover on the green, round button with a car logo, labelled 'motor'. It is present on the blue dashboard with similar buttons next to it. In the dropdown labelled 'quote', select 'private car'.
-3. Under the menu named 'vehicle details', enter {registration_number} as registration number (spaced as MH 02 FR 1294), click on the 'fetch vehicle details' button.
-4. Once details have been automatically filled, enter the following fields down the menu -
-    i. select February under 'select month' dropdown in Manufacturing year and month.
-    ii. select 'short term' under 'Period Of Previous Policy'.
-    iii. The 'Previous Policy Start Date' is 25/02/2021, and the 'Previous Policy End Date' is 15/04/2021.
-    iv. select 'yes' for 'Vehicle Ownership Transfer done in previous year policy'.
-    v. check on 'NCB Eligibility Criteria' (this opens more elements).
-    vi. 'claim on last policy': no.
-    vii. 'last year ncb': 35%.
-5. Click 'get coverage details' and wait for the next form to load.
-6. In the menu named 'Cover Details', scroll down and click on 'calculate premium'. Fetch the value that comes up.`,
-    parallel: 5
-  },
-]
 
 const MOCK_CHAT_HISTORY = [
   // { id: 1, role: 'user', content: 'What is the travel expense policy for international flights?' },
@@ -486,9 +423,10 @@ const DocumentChatMode = ({ showNotification }) => {
 // ==================================================================================
 
 const BrowserAgentMode = ({ showNotification }) => {
-  const [prompts, setPrompts] = useLocalStorage('finops_prompts', INITIAL_TEMPLATES);
+  const [prompts, setPrompts] = useState(INITIAL_TEMPLATES);
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [activeAgents, setActiveAgents] = useState([]);
+  const [newTemplateTitle, setNewTemplateTitle] = useState('');
   const [executionModal, setExecutionModal] = useState(null); // { promptId, title, ... }
   
   // -- Execution Logic --
@@ -539,15 +477,16 @@ const BrowserAgentMode = ({ showNotification }) => {
   };
 
   const saveCurrentPrompt = () => {
-    if (!currentPrompt.trim()) return;
+    if (!currentPrompt.trim() || !newTemplateTitle.trim()) return;
     const newTemplate = {
       id: Date.now(),
-      title: `Custom Workflow ${prompts.length + 1}`,
+      title: newTemplateTitle,
       prompt: currentPrompt,
       parallel: 1
     };
     setPrompts([...prompts, newTemplate]);
     setCurrentPrompt('');
+    setNewTemplateTitle('');
     showNotification('Prompt saved to templates');
   };
 
@@ -688,10 +627,16 @@ const BrowserAgentMode = ({ showNotification }) => {
         <div className="bg-white border-t border-slate-200 p-6 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
           <div className="max-w-4xl mx-auto">
              <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-semibold text-slate-700">New Agent Command</label>
-                <button onClick={saveCurrentPrompt} className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium">
-                   <Save size={14} /> Save as Template
-                </button>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-semibold text-slate-700">New Agent Command</label>
+                  <input
+                    type="text"
+                    value={newTemplateTitle}
+                    onChange={(e) => setNewTemplateTitle(e.target.value)}
+                    placeholder="Template Name"
+                    className="bg-slate-50 border border-slate-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  />
+                </div>
              </div>
              <div className="flex gap-2">
                <div className="flex-1 relative">
@@ -702,6 +647,11 @@ const BrowserAgentMode = ({ showNotification }) => {
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none h-14 shadow-inner transition-all focus:h-24"
                  />
                  <Bot className="absolute right-3 top-3 text-slate-400" size={18} />
+               </div>
+               <div className="flex flex-col gap-1">
+                 <button onClick={saveCurrentPrompt} disabled={!currentPrompt.trim() || !newTemplateTitle.trim()} className="text-xs flex-1 w-full flex items-center justify-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium bg-indigo-50 hover:bg-indigo-100 rounded-lg px-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 transition-colors">
+                    <Save size={14} /> Save
+                 </button>
                </div>
                <button 
                   onClick={async () => {

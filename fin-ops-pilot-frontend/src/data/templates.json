@@ -1,0 +1,4 @@
+[
+  { "id": 1, "title": "Invoice Extraction", "prompt": "Go to generic-invoices.com, log in, and download all PDF invoices from last month.", "parallel": 2 },
+  { "id": 2, "title": "Competitor Pricing", "prompt": "Scrape pricing data for \"Enterprise Plan\" from top 5 competitor sites.", "parallel": 5 }
+]
