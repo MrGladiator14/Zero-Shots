@@ -324,14 +324,14 @@ async def execute_workflow(
     
     # Universal values shared across all records
     universal_values = {
-        "username": insurer_config["username"],
-        "password": insurer_config["password"],
+        "username": insurer_config.get("username", "dummyname"),
+        "password": insurer_config.get("password", "dummy"),
         "today_date": datetime.now().strftime("%Y-%m-%d"),
     }
 
     # Create prompt template
     insurance_prompt_template = PromptTemplate(
-        input_variables=insurer_config["input_variables"],
+        input_variables=insurer_config.get("input_variables", ["username", "password"]),
         template=prompt,
     )
 

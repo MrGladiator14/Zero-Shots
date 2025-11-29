@@ -747,7 +747,7 @@ const ExecutionConfigModal = ({ template, onClose, onExecute }) => {
         title: template.title,
         prompt: template.prompt,
         parallelCount: parseInt(parallelCount),
-        csvData: csvFile.name
+        csvData: csvFile?.name || null
     };
 
     const formData = new FormData();
