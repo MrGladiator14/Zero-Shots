@@ -214,13 +214,14 @@ const DocumentChatMode = ({ showNotification }) => {
       }
 
       setIsUploading(true);
-      const formData = new FormData();
-      formData.append('file', selectedFile);
 
       try {
         const response = await fetch('http://localhost:8000/api/upload_doc', {
           method: 'POST',
-          body: formData,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: selectedFile.name }),
         });
 
         if (!response.ok) {
@@ -283,7 +284,7 @@ const DocumentChatMode = ({ showNotification }) => {
         },
         body: JSON.stringify({
           message: clientMessageInput,
-          context_document: "+91"+contextFileRef.current,
+          context_document: contextFileRef.current,
         }),
       });
 

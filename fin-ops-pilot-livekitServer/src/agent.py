@@ -27,17 +27,16 @@ logger = logging.getLogger("agent")
 
 load_dotenv(".env")
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class Assistant(Agent):
     def __init__(self) -> None:
-        base_instructions = """You are a helpful voice AI assistant For a Insurance company. The user is interacting with you via voice, even if you perceive the conversation as text.
+        base_instructions = """You are a helpful voice AI Reminder bot for a Insurance company. You are interacting with the user via voice, even if you perceive the conversation as text.
             You eagerly assist users with their questions by providing information from the provided 'Policy Schedule' document.
             Your responses are concise, to the point, and without any complex formatting or punctuation including emojis, asterisks, or other symbols.
             You are curious, friendly and professional"""
-
-        client_details_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "context", "client_details.txt"
-        )
+        
+        client_details_path = os.path.join(BASE_DIR, "context", "client_details.txt")
         try:
             with open(client_details_path, "r") as f:
                 client_details = f.read()
@@ -52,13 +51,11 @@ class Assistant(Agent):
         This tool reads the 'Policy Schedule' document and returns its contents as text.
         """
         logger.info("loading policy schedule details")
-        policy_schedule_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "context", "policy_schedule.txt"
-        )
+        policy_schedule_path = os.path.join(BASE_DIR, "context", "policy_schedule.txt")
         try:
             with open(policy_schedule_path, "r") as f:
                 policy_schedule_details = f.read()
-            return
+            return policy_schedule_details
         except FileNotFoundError:
             return "No policy schedule details found."
     
