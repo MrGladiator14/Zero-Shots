@@ -65,9 +65,46 @@ const useLocalStorage = (key, initialValue) => {
 
 // --- Mock Data & Constants ---
 const INITIAL_TEMPLATES = [
-  { id: 1, title: 'Invoice Extraction', prompt: 'Go to generic-invoices.com, log in, and download all PDF invoices from last month.', parallel: 2 },
-  { id: 2, title: 'Competitor Pricing', prompt: 'Scrape pricing data for "Enterprise Plan" from top 5 competitor sites.', parallel: 5 },
-];
+  {
+    id: 1,
+    title: 'Royal Sundaram Motor policy Quote Fetch Workflow',
+    prompt: `1. Navigate to Login to 'https://www.royalsundaram.in/MOPIS/Login.jsp', and then enter username and password. Username is {username}, password is {password}. Click on sign in after both username and password are entered.
+2. From dashboard, click 'Rating Calculator' in side menu. Wait for 10 seconds.
+3. Select 'New Business' icon under 'Type of Policy' and choose 'Private Car passenger' in the list of options present below. Wait for 10 seconds.
+4. Click on 'Private Car' icon under the 'click tick done' title. Wait for 10 seconds.
+5. On the 'Car Insurance in a few steps' box, enter vehicle number {registration_number} and click on 'get started'. Note that there are 4 text boxes for the vehicle number input; add 'MH' to first, '02' to the next one and so on. Once done, wait for 10 seconds.
+6. Click Proceed on the popup that follows; do this for any popups that come up.
+7. On the Policy details page, scroll down to the 'Previous Insurance and Pre Inspection Details' and set date under 'Previous Policy Expiry Date' as 7/11/2025. DO NOT touch any other elements.
+8. Only once the date is set, click 'next'. Wait for 10 seconds.
+9. On the side menu that shows up, click on 'proceed'. Say yes to any popups that come up.
+10. On the vpc_comprehensive page, set distance to 'unlimited km', wait for 10 seconds.
+11. Click on calculate / recalculate button. Wait for 10 seconds.
+12. Click on the 'Freeze Quote' button once it turns blue.
+13. On the side menu that comes up, enter name '{first_name}', last name: '{last_name}', WhatsApp number: '{whatsapp_number}', and click on submit. Wait for 10 seconds.
+14. Click on 'policy documents' dropdown, and choose 'print quote' option. The quote file should now be on a different tab.`,
+    parallel: 2
+  },
+  {
+    id: 2,
+    title: 'Vehicle Premium calculation from Reliance Portal',
+    prompt:
+      `Goal: Fetching Vehicle Premium value.
+1. Log into https://smartzone.reliancegeneral.co.in/Login/IMDLogin. Fill username: {username}, and password: {password}. Also fill the CAPTCHA value based on the image you see above it. Once done, click on the circular 'LOGIN' button. You may retry the captcha by clicking on 'refresh symbol' if you fail.
+2. Once the dashboard loads, hover on the green, round button with a car logo, labelled 'motor'. It is present on the blue dashboard with similar buttons next to it. In the dropdown labelled 'quote', select 'private car'.
+3. Under the menu named 'vehicle details', enter {registration_number} as registration number (spaced as MH 02 FR 1294), click on the 'fetch vehicle details' button.
+4. Once details have been automatically filled, enter the following fields down the menu -
+    i. select February under 'select month' dropdown in Manufacturing year and month.
+    ii. select 'short term' under 'Period Of Previous Policy'.
+    iii. The 'Previous Policy Start Date' is 25/02/2021, and the 'Previous Policy End Date' is 15/04/2021.
+    iv. select 'yes' for 'Vehicle Ownership Transfer done in previous year policy'.
+    v. check on 'NCB Eligibility Criteria' (this opens more elements).
+    vi. 'claim on last policy': no.
+    vii. 'last year ncb': 35%.
+5. Click 'get coverage details' and wait for the next form to load.
+6. In the menu named 'Cover Details', scroll down and click on 'calculate premium'. Fetch the value that comes up.`,
+    parallel: 5
+  },
+]
 
 const MOCK_CHAT_HISTORY = [
   // { id: 1, role: 'user', content: 'What is the travel expense policy for international flights?' },
@@ -767,8 +804,8 @@ const ExecutionConfigModal = ({ template, onClose, onExecute }) => {
     formData.append('title', config.title);
     formData.append('prompt', config.prompt);
     formData.append('parallelCount', config.parallelCount);
-    if (config.csvData) {
-      formData.append('csvFile', config.csvData);
+    if (csvFile) {
+      formData.append('csvFile', csvFile);
     }
 
     try {

@@ -12,20 +12,11 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException, BackgroundTa
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_core.prompts import PromptTemplate
-from .config import Settings, settings as app_settings
-from . import services
+
+
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# --- Dependency Injection ---
-
-def get_settings() -> Settings:
-    return app_settings
-
-def get_openai_client(settings: Annotated[Settings, Depends(get_settings)]) -> openai.OpenAI:
-    """Dependency to create and provide an OpenAI client."""
-    return openai.OpenAI(api_key=settings.OPENAI_API_KEY)
 
 app = FastAPI(title="FinOps Copilot API")
 
